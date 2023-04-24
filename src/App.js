@@ -19,7 +19,8 @@ function App() {
 
     useEffect(() => {
         fetchData(cityName);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[]);
 
     const fetchData = async (cityName) => {
         const options = {
