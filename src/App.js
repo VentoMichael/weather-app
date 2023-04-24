@@ -38,7 +38,7 @@ function App() {
             );
             const data = await response.json();
             const {current, location, forecast} = data;
-            const {temp_c: tempC, feelslike_c: feelsLikeC, humidity, wind_kph: wind_kph} = current;
+            const {temp_c: tempC, feelslike_c: feelsLikeC, humidity, wind_kph} = current;
             const {name, country, localtime: localtimeText} = location;
             const date = new Date(localtimeText);
             const formatDate = (dateString) => {
