@@ -1,9 +1,10 @@
 import './App.css';
-import {useEffect, useState,Fragment} from "react";
+import {useEffect, useState, Fragment} from "react";
 
 
 function App() {
     const [cityName, setCityName] = useState("Antwerp");
+    const [fetchErrorCity, setFetchErrorCity] = useState(false);
     const [weather, setWeather] = useState({
         temperature: "",
         feelsLike: "",
@@ -29,6 +30,8 @@ function App() {
         localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
     }, [previousResearch]);
     const fetchData = async (cityName) => {
+        setFetchErrorCity(false)
+
         const options = {
             method: 'GET',
             params: {q: cityName},
@@ -88,29 +91,29 @@ function App() {
                 dayOfWeek,
                 forecast: formattedForecast,
             });
+                if (previousResearch.length >= 5) {
+                    let updatedResearch = [...previousResearch, cityName].slice(-5);
+                    setPreviousResearch(updatedResearch);
+                } else {
+                    setPreviousResearch(previousResearch => [...previousResearch, cityName])
+                }
+
+                localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
         } catch (err) {
-            console.error(err);
+            setFetchErrorCity(true)
+            console.error('City not found')
         }
     };
     const handleCityChange = (event) => {
         setCityName(event.target.value);
     };
 
-    const handleSearchClick = () => {
-
-        if (previousResearch.length >= 5) {
-            previousResearch.shift()
-            setPreviousResearch(previousResearch => [...previousResearch, cityName])
-        } else {
-            setPreviousResearch(previousResearch => [...previousResearch, cityName])
-        }
-
-        localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
+    const handleSearchClick = (cityName) => {
         fetchData(cityName);
     };
-    const handleCityChangeViaStorage = (city) => {
-        setCityName(city);
-        fetchData(city);
+    const handleCityChangeViaStorage = (cityName) => {
+        setCityName(cityName);
+        handleSearchClick(cityName)
     }
     return (
         <Fragment>
@@ -156,21 +159,28 @@ function App() {
                                     <span className="day-temp">{day.maxTemp}</span>
                                 </li>
                             ))}
-
                         </ul>
                     </div>
                     <div className="location-container">
+
                         <input
                             type="text"
                             placeholder="Enter a city name"
                             id="search-btn"
-                            className="searchTerm"
+                            className={`searchTerm${fetchErrorCity ? ' errorCity' : ''}`}
                             value={cityName}
                             onChange={handleCityChange}
                         />
-                        <button className="location-button" onClick={() => handleSearchClick()}>
+                        <button className="location-button" onClick={() => handleSearchClick(cityName)}>
                             <span>Change location</span>
                         </button>
+                        {
+                            fetchErrorCity && (
+                                <p className="text-error-city">
+                                    Wrong city
+                                </p>
+                            )
+                        }
                     </div>
                 </div>
             </div>

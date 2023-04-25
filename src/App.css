@@ -37,7 +37,7 @@ body {
   box-shadow: 0 0 70px -10px rgba(0, 0, 0, 0.2);
   background-color: #222831;
   color: #ffffff;
-  height: 500px;
+  height: 550px;
 }
 
 .weather-side {
@@ -225,6 +225,13 @@ body {
   width: auto;
   margin-right: 5px;
 }
+.text-error-city{
+  color: red;margin-top: 10px
+}
 .container_research{
   color: white
+}
+.errorCity{
+  border:2px solid red;
+  margin-bottom: 2px;
 }
