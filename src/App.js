@@ -1,5 +1,5 @@
 import './App.css';
-import {useEffect, useState} from "react";
+import {useEffect, useState,Fragment} from "react";
 
 
 function App() {
@@ -16,12 +16,18 @@ function App() {
         icon: "",
         forecast: [],
     });
-
+    const [previousResearch, setPreviousResearch] = useState(() => {
+        const storedData = localStorage.getItem("previousResearch");
+        return storedData ? JSON.parse(storedData) : [];
+    });
     useEffect(() => {
         fetchData(cityName);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[]);
+    }, []);
 
+    useEffect(() => {
+        localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
+    }, [previousResearch]);
     const fetchData = async (cityName) => {
         const options = {
             method: 'GET',
@@ -82,7 +88,6 @@ function App() {
                 dayOfWeek,
                 forecast: formattedForecast,
             });
-            console.log(data);
         } catch (err) {
             console.error(err);
         }
@@ -92,69 +97,92 @@ function App() {
     };
 
     const handleSearchClick = () => {
-        console.log(cityName)
+
+        if (previousResearch.length >= 5) {
+            previousResearch.shift()
+            setPreviousResearch(previousResearch => [...previousResearch, cityName])
+        } else {
+            setPreviousResearch(previousResearch => [...previousResearch, cityName])
+        }
+
+        localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
         fetchData(cityName);
+
     };
     return (
-        <div className="container">
-            <div className="weather-side">
-                <div className="weather-gradient"><img src={weather.icon} alt=""/></div>
-                <div className="date-container">
-                    <p className="location">{weather.name} - {weather.country}</p>
+        <Fragment>
+            <div className="container">
+                <div className="weather-side">
+                    <div className="weather-gradient"><img src={weather.icon} alt=""/></div>
+                    <div className="date-container">
+                        <p className="location">{weather.name} - {weather.country}</p>
 
-                    <h2 className="date-dayname">{weather.dayOfWeek}</h2>
-                    <i className="location-icon" data-feather="map-pin"></i>
-                    <span className="location">{weather.locationText}</span>
-                </div>
-                <div className="weather-container"><i className="weather-icon" data-feather="sun"></i>
-                    <h1 className="weather-temp">{weather.temperature}</h1>
-                    <h3 className="weather-desc">{weather.conditionText}</h3>
-                </div>
-            </div>
-            <div className="info-side">
-                <div className="today-info-container">
-                    <div className="today-info">
-                        <div className="precipitation"><span className="title">WIND</span><span
-                            className="value">{weather.wind_kph}</span>
-                            <div className="clear"></div>
-                        </div>
-                        <div className="humidity"><span className="title">HUMIDITY</span><span
-                            className="value">{weather.humidity}</span>
-                            <div className="clear"></div>
-                        </div>
-                        <div className="wind"><span className="title">FELLING LIKE</span><span
-                            className="value">{weather.feelsLike}</span>
-                            <div className="clear"></div>
-                        </div>
+                        <h2 className="date-dayname">{weather.dayOfWeek}</h2>
+                        <i className="location-icon" data-feather="map-pin"></i>
+                        <span className="location">{weather.locationText}</span>
+                    </div>
+                    <div className="weather-container"><i className="weather-icon" data-feather="sun"></i>
+                        <h1 className="weather-temp">{weather.temperature}</h1>
+                        <h3 className="weather-desc">{weather.conditionText}</h3>
                     </div>
                 </div>
-                <div className="week-container today-info">
-                    <span className="title">NEXT THREE DAYS</span>
-                    <ul className="week-list">
-                        {weather.forecast && weather.forecast.map((day) => (
-                            <li key={day.dayOfWeek}>
-                                <i className="day-icon" data-feather="cloud"><img src={day.icon} alt=""/></i>
-                                <span className="day-name">{day.dayOfWeek}</span>
-                                <span className="day-temp">{day.maxTemp}</span>
-                            </li>
-                        ))}
+                <div className="info-side">
+                    <div className="today-info-container">
+                        <div className="today-info">
+                            <div className="precipitation"><span className="title">WIND</span><span
+                                className="value">{weather.wind_kph}</span>
+                                <div className="clear"></div>
+                            </div>
+                            <div className="humidity"><span className="title">HUMIDITY</span><span
+                                className="value">{weather.humidity}</span>
+                                <div className="clear"></div>
+                            </div>
+                            <div className="wind"><span className="title">FELLING LIKE</span><span
+                                className="value">{weather.feelsLike}</span>
+                                <div className="clear"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="week-container today-info">
+                        <span className="title">NEXT THREE DAYS</span>
+                        <ul className="week-list">
+                            {weather.forecast && weather.forecast.map((day) => (
+                                <li key={day.dayOfWeek}>
+                                    <i className="day-icon" data-feather="cloud"><img src={day.icon} alt=""/></i>
+                                    <span className="day-name">{day.dayOfWeek}</span>
+                                    <span className="day-temp">{day.maxTemp}</span>
+                                </li>
+                            ))}
 
-                    </ul>
-                </div>
-                <div className="location-container">
-                    <input
-                        type="text"
-                        placeholder="Enter a city name"
-                        id="search-btn"
-                        className="searchTerm"
-                        value={cityName}
-                        onChange={handleCityChange}
-                    />
-                    <button className="location-button" onClick={()=>handleSearchClick()}><span>Change location</span>
-                    </button>
+                        </ul>
+                    </div>
+                    <div className="location-container">
+                        <input
+                            type="text"
+                            placeholder="Enter a city name"
+                            id="search-btn"
+                            className="searchTerm"
+                            value={cityName}
+                            onChange={handleCityChange}
+                        />
+                        <button className="location-button" onClick={() => handleSearchClick()}>
+                            <span>Change location</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+            {/* eslint-disable-next-line array-callback-return */}
+            {previousResearch.length > 0 &&
+                <section className="container_research">
+                    <h2>5 Previous research</h2>
+                    <ul>
+                        {previousResearch.map((element, index) => (
+                            <li key={index}>{element}</li>
+                        ))}
+                    </ul>
+                </section>
+            }
+        </Fragment>
     );
 }
 
