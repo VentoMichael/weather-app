@@ -107,8 +107,11 @@ function App() {
 
         localStorage.setItem("previousResearch", JSON.stringify(previousResearch));
         fetchData(cityName);
-
     };
+    const handleCityChangeViaStorage = (city) => {
+        setCityName(city);
+        fetchData(city);
+    }
     return (
         <Fragment>
             <div className="container">
@@ -177,7 +180,7 @@ function App() {
                     <h2>5 Previous research</h2>
                     <ul>
                         {previousResearch.map((element, index) => (
-                            <li key={index}>{element}</li>
+                            <li onClick={() => handleCityChangeViaStorage(element)} key={index}>{element}</li>
                         ))}
                     </ul>
                 </section>
